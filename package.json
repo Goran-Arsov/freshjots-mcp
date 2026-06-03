@@ -1,0 +1,51 @@
+{
+  "name": "freshjots-mcp",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server for Fresh Jots — let Claude, Cursor, and any MCP client read and write your Fresh Jots notes via the API.",
+  "type": "module",
+  "bin": {
+    "freshjots-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepare": "tsc",
+    "start": "node dist/index.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "freshjots",
+    "mcp",
+    "model-context-protocol",
+    "notes",
+    "ai",
+    "claude",
+    "llm",
+    "logging"
+  ],
+  "author": "Goran Arsov <arsphy@yahoo.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/Goran-Arsov/freshjots-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/Goran-Arsov/freshjots-mcp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Goran-Arsov/freshjots-mcp.git"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  }
+}
