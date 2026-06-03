@@ -72,3 +72,21 @@ test("a non-JSON error body still yields a FreshJotsApiError", async () => {
     (e) => e instanceof FreshJotsApiError && e.code === "unknown" && e.status === 500,
   );
 });
+
+test("can be constructed without a token — deferred auth so the server can start and introspect", () => {
+  assert.doesNotThrow(() => new FreshJotsClient({ baseUrl: "https://example.test/api/v1" }));
+});
+
+test("a request without a token fails with a missing_token error and never calls fetch", async () => {
+  let fetched = false;
+  globalThis.fetch = async () => {
+    fetched = true;
+    return jsonResponse(200, {});
+  };
+  const tokenless = new FreshJotsClient({ baseUrl: "https://example.test/api/v1" });
+  await assert.rejects(
+    () => tokenless.listFolders(),
+    (e) => e instanceof FreshJotsApiError && e.code === "missing_token" && e.status === 401,
+  );
+  assert.equal(fetched, false);
+});

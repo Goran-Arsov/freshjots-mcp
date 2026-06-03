@@ -41,13 +41,18 @@ async function run(fn: () => Promise<unknown>): Promise<ToolResult> {
   }
 }
 
+// The token is read but not required at startup: the server still starts,
+// registers its tools, and answers introspection (initialize / tools/list)
+// without it — so registries (e.g. Glama) and clients can discover the tools
+// before a token is configured. The client raises a clear missing_token error
+// if a tool is actually called without one.
 const token = process.env.FRESHJOTS_TOKEN ?? process.env.FRESHJOTS_API_TOKEN;
 if (!token) {
   console.error(
-    "freshjots-mcp: missing FRESHJOTS_TOKEN. Create an API token at " +
+    "freshjots-mcp: no FRESHJOTS_TOKEN set — the server will start and list its tools, but tool " +
+      "calls will fail until you set one. Create a token at " +
       "https://freshjots.com/settings/api_tokens and set FRESHJOTS_TOKEN in the server's environment.",
   );
-  process.exit(1);
 }
 
 const client = new FreshJotsClient({

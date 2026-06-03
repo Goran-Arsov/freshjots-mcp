@@ -40,24 +40,35 @@ export interface ListOptions {
 }
 
 export interface ClientOptions {
-  token: string;
+  token?: string;
   baseUrl?: string;
   userAgent?: string;
 }
 
 export class FreshJotsClient {
   readonly baseUrl: string;
-  private readonly token: string;
+  private readonly token?: string;
   private readonly userAgent: string;
 
+  // The token is optional so the server can start, register its tools, and
+  // answer introspection (initialize / tools/list) without credentials — a real
+  // token is only required to *call* a tool, which request() enforces.
   constructor({ token, baseUrl, userAgent }: ClientOptions) {
-    if (!token) throw new Error("FreshJotsClient requires an API token");
     this.token = token;
     this.baseUrl = (baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
     this.userAgent = userAgent ?? "freshjots-mcp";
   }
 
   private async request(method: string, path: string, body?: unknown): Promise<any> {
+    if (!this.token) {
+      throw new FreshJotsApiError({
+        status: 401,
+        code: "missing_token",
+        message:
+          "No Fresh Jots API token configured. Set FRESHJOTS_TOKEN in the server's environment " +
+          "(create one at https://freshjots.com/settings/api_tokens).",
+      });
+    }
     const headers: Record<string, string> = {
       Authorization: `Bearer ${this.token}`,
       Accept: "application/json",
