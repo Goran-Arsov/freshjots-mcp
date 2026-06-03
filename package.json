@@ -1,6 +1,7 @@
 {
   "name": "freshjots-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "mcpName": "io.github.goran-arsov/freshjots-mcp",
   "description": "Model Context Protocol server for Fresh Jots — let Claude, Cursor, and any MCP client read and write your Fresh Jots notes via the API.",
   "type": "module",
   "bin": {
