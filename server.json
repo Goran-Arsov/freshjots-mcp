@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.goran-arsov/freshjots-mcp",
-  "description": "Read and write your Fresh Jots notes from Claude, Cursor, and any MCP client — list, create, append, update, move, and organize plain-text notes and folders. The standout tool is append-to-note: append to a note by filename and create it on first write, the logging primitive for AI session transcripts, cron output, and journals.",
+  "description": "Read and write your Fresh Jots notes from Claude, Cursor, and any MCP client.",
   "version": "0.1.1",
   "title": "Fresh Jots",
   "websiteUrl": "https://freshjots.com/for/developers",
