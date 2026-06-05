@@ -1,5 +1,7 @@
 # freshjots-mcp
 
+[![smithery badge](https://smithery.ai/badge/arsphy/freshjots-mcp)](https://smithery.ai/servers/arsphy/freshjots-mcp)
+
 A [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server for [Fresh Jots](https://freshjots.com). It exposes your Fresh Jots notes as MCP tools, so any MCP client — Claude Desktop, Claude Code, Cursor, and others — can read and write them directly. Point your AI agent's output at a Fresh Jots note, log your coding sessions, or let an assistant search and update your notebook, all through the API.
 
 MCP is an open standard for connecting AI assistants to external tools and data — think of it as a universal adapter, so one integration works across every compatible client.
