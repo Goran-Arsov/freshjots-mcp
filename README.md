@@ -21,7 +21,7 @@ Notes are **plain text** through the API: rich (Trix) notes can be listed and re
 ## Requirements
 
 - Node.js 18 or newer
-- A Fresh Jots API token (Pro or Team plan). Create one at <https://freshjots.com/settings/api_tokens>. Tokens look like `mn_…`.
+- A Fresh Jots API token (Dev or Team plan). Create one at <https://freshjots.com/settings/api_tokens>. Tokens look like `mn_…`.
 
 ## Install
 

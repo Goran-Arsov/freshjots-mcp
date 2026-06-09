@@ -19,7 +19,7 @@
       "environmentVariables": [
         {
           "name": "FRESHJOTS_TOKEN",
-          "description": "Fresh Jots API token. Create one at https://freshjots.com/settings/api_tokens (Pro or Team plan).",
+          "description": "Fresh Jots API token. Create one at https://freshjots.com/settings/api_tokens (Dev or Team plan).",
           "isRequired": true,
           "isSecret": true
         }
