@@ -22,6 +22,12 @@
           "description": "Fresh Jots API token. Create one at https://freshjots.com/settings/api_tokens (Dev or Team plan).",
           "isRequired": true,
           "isSecret": true
+        },
+        {
+          "name": "FRESHJOTS_PASSPHRASE",
+          "description": "Optional passphrase for transparent client-side encryption. When set, create_note/append_to_note accept encrypt:true and read_note accepts decrypt:true — Fresh Jots then stores only ciphertext it cannot read.",
+          "isRequired": false,
+          "isSecret": true
         }
       ]
     }

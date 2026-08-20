@@ -46,6 +46,20 @@ test("appendByFilename URL-encodes the filename and posts text + append_only", a
   assert.deepEqual(JSON.parse(calls[0].init.body), { text: "hi", append_only: false });
 });
 
+test("createNote passes client_encrypted through to the note body", async () => {
+  const calls = stubFetch(() => jsonResponse(201, { id: 1 }));
+  await client().createNote({ title: "x", plain_body: "fj1:abc", client_encrypted: true });
+  assert.deepEqual(JSON.parse(calls[0].init.body), {
+    note: { title: "x", plain_body: "fj1:abc", client_encrypted: true },
+  });
+});
+
+test("appendByFilename passes client_encrypted through", async () => {
+  const calls = stubFetch(() => jsonResponse(201, { created: true }));
+  await client().appendByFilename("log.txt", "fj1:abc", { client_encrypted: true });
+  assert.deepEqual(JSON.parse(calls[0].init.body), { text: "fj1:abc", client_encrypted: true });
+});
+
 test("moveNote sends folder_id: null to un-file a note", async () => {
   const calls = stubFetch(() => jsonResponse(200, { id: 1, folder_id: null }));
   await client().moveNote(1, null);

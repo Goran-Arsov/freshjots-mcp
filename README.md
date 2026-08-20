@@ -42,6 +42,11 @@ The server reads its token from the environment:
 
 - `FRESHJOTS_TOKEN` (required) — your `mn_…` API token. `FRESHJOTS_API_TOKEN` is also accepted.
 - `FRESHJOTS_BASE_URL` (optional) — defaults to `https://freshjots.com/api/v1`. Override for a self-hosted or staging instance.
+- `FRESHJOTS_PASSPHRASE` (optional) — enables transparent client-side encryption (see below).
+
+## Encryption
+
+Set `FRESHJOTS_PASSPHRASE` and the server can keep notes Fresh Jots cannot read. `create_note` and `append_to_note` take an `encrypt: true` argument that encrypts the body **locally** before it ever leaves your machine, and marks the note client-encrypted; `read_note` takes `decrypt: true` to decrypt it back. The model works in plaintext while Fresh Jots stores only ciphertext — you hold the only key, so **lose the passphrase and the note is unrecoverable**. Encryption is per-note and personal-only (not team notes); a note's title and metadata stay in the clear. The format (`fj1`: AES-256-CBC + HMAC-SHA256, PBKDF2) is interoperable with the JS, Python, Ruby, and shell clients. See <https://freshjots.com/encrypted-notes>.
 
 ### Claude Desktop
 
