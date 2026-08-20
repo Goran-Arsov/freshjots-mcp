@@ -14,6 +14,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 
 import { FreshJotsClient, FreshJotsApiError, type NoteFields } from "./client.js";
+import { encrypt as fjEncrypt, decryptBody as fjDecryptBody } from "./crypto.js";
 
 const VERSION: string = JSON.parse(
   readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "package.json"), "utf8"),
@@ -63,6 +64,21 @@ const client = new FreshJotsClient({
 
 const server = new McpServer({ name: "freshjots", version: VERSION });
 
+// Encryption is transparent: when a tool is asked to encrypt or decrypt, the
+// server does it locally with FRESHJOTS_PASSPHRASE from its own environment, so
+// the model works in plaintext while Fresh Jots only ever stores ciphertext it
+// cannot read. Read at call time (not startup) so the server still starts and
+// lists its tools without a passphrase configured.
+function requirePassphrase(): string {
+  const p = process.env.FRESHJOTS_PASSPHRASE;
+  if (!p) {
+    throw new Error(
+      "encryption requested, but FRESHJOTS_PASSPHRASE is not set in the server's environment",
+    );
+  }
+  return p;
+}
+
 // ---- Notes ----
 
 server.registerTool(
@@ -95,15 +111,26 @@ server.registerTool(
     inputSchema: {
       filename: z.string().optional().describe("Exact filename of the note (preferred addressing)."),
       id: z.number().int().optional().describe("Numeric note id (e.g. from list_notes)."),
+      decrypt: z
+        .boolean()
+        .optional()
+        .describe(
+          "Decrypt the returned plain_body locally with FRESHJOTS_PASSPHRASE (for notes stored client-encrypted). fj1: lines are decrypted; other lines pass through.",
+        ),
     },
     annotations: { readOnlyHint: true },
   },
-  async ({ filename, id }) =>
-    run(() => {
+  async ({ filename, id, decrypt }) =>
+    run(async () => {
       if (filename && id != null) throw new Error("Provide only one of filename or id, not both.");
-      if (filename) return client.getNoteByFilename(filename);
-      if (id != null) return client.getNoteById(id);
-      throw new Error("Provide a filename or an id.");
+      let note: any;
+      if (filename) note = await client.getNoteByFilename(filename);
+      else if (id != null) note = await client.getNoteById(id);
+      else throw new Error("Provide a filename or an id.");
+      if (decrypt && note && typeof note.plain_body === "string") {
+        note = { ...note, plain_body: fjDecryptBody(note.plain_body, requirePassphrase()) };
+      }
+      return note;
     }),
 );
 
@@ -117,9 +144,23 @@ server.registerTool(
       title: z.string().min(1).describe("Title of the note. The server derives the filename from it."),
       body: z.string().optional().describe("Plain-text body of the note."),
       folder_id: z.number().int().optional().describe("Optional folder id to file the note under."),
+      encrypt: z
+        .boolean()
+        .optional()
+        .describe(
+          "Encrypt the body locally with FRESHJOTS_PASSPHRASE before storing, and mark the note client-encrypted — Fresh Jots stores only ciphertext it cannot read. Personal accounts only.",
+        ),
     },
   },
-  async ({ title, body, folder_id }) => run(() => client.createNote({ title, plain_body: body, folder_id })),
+  async ({ title, body, folder_id, encrypt }) =>
+    run(() => {
+      const fields: NoteFields = { title, plain_body: body, folder_id };
+      if (encrypt) {
+        fields.plain_body = fjEncrypt(body ?? "", requirePassphrase());
+        fields.client_encrypted = true;
+      }
+      return client.createNote(fields);
+    }),
 );
 
 server.registerTool(
@@ -135,9 +176,24 @@ server.registerTool(
         .boolean()
         .optional()
         .describe("On first-touch creation only: lock the note append-only (default true). Ignored if the note already exists."),
+      encrypt: z
+        .boolean()
+        .optional()
+        .describe(
+          "Encrypt this entry locally with FRESHJOTS_PASSPHRASE before appending; on first-touch creation also marks the stream client-encrypted. Personal accounts only.",
+        ),
     },
   },
-  async ({ filename, text, append_only }) => run(() => client.appendByFilename(filename, text, { append_only })),
+  async ({ filename, text, append_only, encrypt }) =>
+    run(() => {
+      let payload = text;
+      const opts: { append_only?: boolean; client_encrypted?: boolean } = { append_only };
+      if (encrypt) {
+        payload = fjEncrypt(text, requirePassphrase());
+        opts.client_encrypted = true;
+      }
+      return client.appendByFilename(filename, payload, opts);
+    }),
 );
 
 server.registerTool(

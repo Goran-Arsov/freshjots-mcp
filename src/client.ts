@@ -25,6 +25,7 @@ export interface NoteFields {
   plain_body?: string;
   folder_id?: number | null;
   append_only?: boolean | null;
+  client_encrypted?: boolean;
   append_deadline_hours?: number | null;
   alert_email?: string | null;
   webhook_url?: string | null;
@@ -164,10 +165,11 @@ export class FreshJotsClient {
   appendByFilename(
     filename: string,
     text: string,
-    opts: { append_only?: boolean } = {},
+    opts: { append_only?: boolean; client_encrypted?: boolean } = {},
   ): Promise<any> {
     const body: Record<string, unknown> = { text };
     if (opts.append_only !== undefined) body.append_only = opts.append_only;
+    if (opts.client_encrypted !== undefined) body.client_encrypted = opts.client_encrypted;
     return this.request("POST", `/notes/by-filename/${this.seg(filename)}/append`, body);
   }
 
